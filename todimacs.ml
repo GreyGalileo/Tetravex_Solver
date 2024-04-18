@@ -10,16 +10,11 @@ Clauses are represented as lists of integers, the integers being variables
 We ill assemble a set of clauses as a list of lists and 
 convert this to strings at the end of the program when we output to a file
 *)
-type clasue = int list;;
+
+let file = "example.txt"
+
+type clause = int list;;
 type set_clauses = int list list;;
-
-(*--INPUT--*)
-(*Reading the information from the import file*)
-
-let length_board = 2;;
-let height_board = 2;;
-
-
 
 (*-- XOR clauses ( * ) --*)
 (* Creating lists of clauses for the equation *, the xor in a single quadrant
@@ -38,14 +33,115 @@ let negated_2var_clauses = auxiliary_2var_clauses (-9) (-8);;
 
 
 
-let create_quadrant_clauses: int -> int -> set_clauses =
+let create_quadrant_clauses_one_quadrant: int -> int -> set_clauses =
+(* creates the clauses for a given quadrant (s,q) where s is the number of a space on the board and q in in [1,4]*)
   fun space quadrant ->
   (* creates the set of clauses translating that the given quadrant can only have 1 value at a time*)
-  let shift: int->int = fun i -> 9*(space*4+quadrant) + i in
-  List.init 9 ( fun i -> shift i + 1 ) :: (List.map (List.map shift) negated_2var_clauses);;
+  let shift: int =  9*(space*4+quadrant) in
+  List.init 9 ( fun i -> shift + i + 1 ) :: (List.map (List.map (fun i -> i - shift)) negated_2var_clauses);;
   (*returns ^ the clause that tells us one of the variables must be true and ^
      the clause that says that no 2 of the variables can be true at the same time
+     both are shifted by our constant "shift", which encodes which space and quadrant we are considering
   *)
 
+let create_quadrant_clauses_one_space: int -> set_clauses =
+    (*creates all quadrant clauses for one space on the board, which always contains top,bottom,left,right = 0,1,2,3*)
+    fun space ->
+    let f_clauses = create_quadrant_clauses_one_quadrant space in
+    f_clauses 0 @ f_clauses 1 @ f_clauses 2 @ f_clauses 3;;
 
-List.iter (fun l -> (print_string "["); (List.iter (fun i -> print_int i; print_string ", ") l); (print_string "]\n")) (create_quadrant_clauses 0 0);;
+    
+
+let rec create_quadrant_clauses: int -> set_clauses =
+  (*Takes the size of the board [in number of spaces] and creates correspondingly many clauses for each quadrant*)
+  fun num_spaces ->
+    match num_spaces with
+    |s when s<0 -> []
+    |0 -> create_quadrant_clauses_one_space 0 
+    |n -> (create_quadrant_clauses_one_space n) @ create_quadrant_clauses (n-1);;
+
+
+
+
+(* --ADJACENCY CLAUSES ( ** )-- *)
+let rec bottom_adjacency_clauses_aux: int -> int -> int -> set_clauses =
+  (*creates the adjacency clauses that posit that *)
+  fun index line_length space ->
+    let bottomq = space*36 + 10 and topq = (space + line_length)*36 in
+    match index with
+    |n when n<0 -> []
+    |n -> [[bottomq + n; (-1)*(topq + n)];[(-1)*(bottomq + n); (topq + n)]] @ bottom_adjacency_clauses_aux (index-1) line_length space;;
+
+
+let bottom_adjacency_clauses: int -> int -> set_clauses = bottom_adjacency_clauses_aux 9;;
+
+let rec right_adjacency_clauses_aux: int -> int -> set_clauses =
+  fun index space -> 
+    let rightq = space*36 + 3 * 9 + 1 and leftq = (space + 1) * 36 + 2 * 9 + 1 in
+    match index with
+    |n when n<0 -> []
+    |n -> [[rightq + n; (-1)*(leftq + n)];[(-1)*(rightq + n); (leftq + n)]] @ right_adjacency_clauses_aux (index-1) space;;
+
+let right_adjacency_clauses: int -> set_clauses = right_adjacency_clauses_aux 9;;
+
+let create_adjacency_clauses: int -> int -> set_clauses =
+  fun lines columns ->
+    let create_adj_clauses_one_space: int -> set_clauses = fun space ->
+      match space with
+      |n when (n >= lines*columns - 1) -> []
+      |n when (n mod lines == lines-1 ) -> bottom_adjacency_clauses lines space
+      |n when (n >= lines*(columns - 1) - 1) -> right_adjacency_clauses space
+      |n -> (bottom_adjacency_clauses lines space) @ (right_adjacency_clauses space)
+    in 
+    let rec create_adj_clauses_from: int -> set_clauses =
+      fun index ->
+        match index with
+        |n when (n >= lines * columns - 1) -> []
+        |n -> create_adj_clauses_one_space index @ create_adj_clauses_from (index+1)
+    in
+    create_adj_clauses_from 0 ;;
+
+
+
+(*--INPUT--*)
+(*Reading the information from the import file*)
+
+let length_board = 2;;
+let height_board = 2;;
+
+(*--OUTPUT--*)
+(*Outputting list of clauses to a dimacs file*)
+
+let rec add_clause_to_string (s:string) (c:clause) = 
+  match c with
+  |[] -> s ^ " 0\n"
+  |var::res -> add_clause_to_string (s ^ " " ^ (string_of_int var)) res;;
+
+let create_dimacs_file (num_spaces:int) (clauses:set_clauses) =
+  let oc = open_out file in
+  let numvar = num_spaces * 36 and numclauses = List.length clauses in 
+  let firstline = "p cnf " ^ (string_of_int numvar) ^ " " ^ (string_of_int numclauses) ^ "\n" in
+  let body_of_text = List.fold_left add_clause_to_string firstline clauses in
+  Printf.fprintf oc "%s" body_of_text;;
+
+
+(*MAIN function*)
+let main = 
+  let num_columns = 2 and num_lines = 2 in
+  let num_spaces = num_columns*num_lines in
+  let all_clauses = (create_adjacency_clauses num_columns num_lines) @ (create_quadrant_clauses (num_spaces-1)) in
+  create_dimacs_file num_spaces all_clauses;;
+
+
+
+(* Printing a list of lists for testing*)
+
+(*
+print_string "\nAdjacency clauses:\n";;
+
+List.iter (fun l -> (print_string "["); (List.iter (fun i -> print_int i; print_string ", ") l); (print_string "]\n")) (create_adjacency_clauses 2 2);;
+
+print_string "\nQuadrant clauses:\n";;
+
+List.iter (fun l -> (print_string "["); (List.iter (fun i -> print_int i; print_string ", ") l); (print_string "]\n")) (create_quadrant_clauses 3);;
+*)
