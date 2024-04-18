@@ -64,6 +64,9 @@ let rec create_quadrant_clauses: int -> set_clauses =
 
 
 (* --ADJACENCY CLAUSES ( ** )-- *)
+(* Creating lists of clauses for the equation *, the euivqlence between adjacent quadrants, 
+i.e. top and bottom and leeft and right of spaces that are next to each other
+*)
 let rec bottom_adjacency_clauses_aux: int -> int -> int -> set_clauses =
   (*creates the adjacency clauses that posit that *)
   fun index line_length space ->
@@ -102,6 +105,28 @@ let create_adjacency_clauses: int -> int -> set_clauses =
     create_adj_clauses_from 0 ;;
 
 
+(*--TILE CLAUSES ( *** )--*)
+type tile = {top: int; bottom:int; left:int; right:int};;
+
+let create_clauses_single_tile (n:int) (t:tile) =
+  (* creates CNF clauses for a single tile and for all n spaces on the board *)
+  let variables_for_space s = 
+    let v = s*36 in
+     (v+t.top, v+9+t.bottom, v+18+t.left, v+27+t.right)
+  in
+  let variables = List.init n variables_for_space in
+  let add_space_variables  (lst: int list list) (a,b,c,d) =
+    List.fold_left (fun acc sublst -> acc @ [a::sublst ; b::sublst ; c::sublst ; d::sublst]) [] lst
+  in
+  List.fold_left add_space_variables ([[]]:int list list) variables;;
+
+
+
+let create_tile_clauses (num_spaces: int) (tiles: tile list) =
+  List.fold_left (fun acc ti -> acc @ create_clauses_single_tile num_spaces ti) [] tiles;;
+(*takes a list of tiles and a number of spaces 
+and gives a cnf expressinhg that each tile mush be present on on of th spaces*)
+
 
 (*--INPUT--*)
 (*Reading the information from the import file*)
@@ -127,9 +152,24 @@ let create_dimacs_file (num_spaces:int) (clauses:set_clauses) =
 
 (*MAIN function*)
 let main = 
+(*  let t:tile list = [
+    {top = 9; bottom = 7; left = 1; right = 4}; 
+    {top = 6; bottom = 1; left = 1; right = 1}; 
+    {top = 1; bottom = 6; left = 1; right = 2};  
+    {top = 1; bottom = 9; left = 2; right = 9};
+  ] in*)
+  let t:tile list = [
+    {top = 1; bottom = 1; left = 1; right = 1}; 
+    {top = 1; bottom = 1; left = 1; right = 1}; 
+    {top = 1; bottom = 1; left = 1; right = 1};  
+    {top = 1; bottom = 1; left = 1; right = 1};
+  ] in
   let num_columns = 2 and num_lines = 2 in
   let num_spaces = num_columns*num_lines in
-  let all_clauses = (create_adjacency_clauses num_columns num_lines) @ (create_quadrant_clauses (num_spaces-1)) in
+  let adj_clauses = create_adjacency_clauses num_columns num_lines 
+  and qud_clauses = create_quadrant_clauses (num_spaces-1)
+  and tile_clauses = create_tile_clauses num_spaces t in
+  let all_clauses = adj_clauses @ qud_clauses @ tile_clauses in
   create_dimacs_file num_spaces all_clauses;;
 
 
@@ -144,4 +184,7 @@ List.iter (fun l -> (print_string "["); (List.iter (fun i -> print_int i; print_
 print_string "\nQuadrant clauses:\n";;
 
 List.iter (fun l -> (print_string "["); (List.iter (fun i -> print_int i; print_string ", ") l); (print_string "]\n")) (create_quadrant_clauses 3);;
+
+print_string "\nTile clauses:\n";;
+List.iter (fun l -> (print_string "["); (List.iter (fun i -> print_int i; print_string ", ") l); (print_string "]\n")) (create_clauses_single_tile 4 t);;
 *)
