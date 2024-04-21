@@ -61,7 +61,10 @@ def display(solution):
 
 
 #test with a 2x2 tetravex grid
+<<<<<<< HEAD
 print("\nSolution of result:\n")
+=======
+>>>>>>> ad864018d2391d29c49a826f7150d3bf6040b2bb
 list = result2list("result.txt")
 list = getPositive(list)
 list = pos_list2quadrants(list)
@@ -69,6 +72,7 @@ list = pos2tiles(list)
 list = convert_to_solution(list)
 display(list)
 
+<<<<<<< HEAD
 
 #test with a 2x2 tetravex grid with tile clauses
 print("\nSolution of result1:\n")
@@ -81,6 +85,10 @@ display(list)
 
 #test with a 3x3 tetravex grid
 """ test = [
+=======
+#test with a 3x3 tetravex grid
+test = [
+>>>>>>> ad864018d2391d29c49a826f7150d3bf6040b2bb
     [8, 2, 2, 9],
     [2, 2, 9, 7],
     [1, 1, 1, 1],
@@ -93,4 +101,7 @@ display(list)
 ]
 test = convert_to_solution(test)
 display(test)
+<<<<<<< HEAD
  """
+=======
+>>>>>>> ad864018d2391d29c49a826f7150d3bf6040b2bb
