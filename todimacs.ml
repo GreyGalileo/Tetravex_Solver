@@ -70,9 +70,9 @@ i.e. top and bottom and leeft and right of spaces that are next to each other
 let rec bottom_adjacency_clauses_aux: int -> int -> int -> set_clauses =
   (*creates the adjacency clauses that posit that *)
   fun index line_length space ->
-    let bottomq = space*36 + 10 and topq = (space + line_length)*36 + 1 in
+    let bottomq = space*36 + 9 and topq = (space + line_length)*36 in
     match index with
-    |n when n<0 -> []
+    |n when n<=0 -> []
     |n -> [[bottomq + n; (-1)*(topq + n)];[(-1)*(bottomq + n); (topq + n)]] @ bottom_adjacency_clauses_aux (index-1) line_length space;;
 
 
@@ -80,9 +80,9 @@ let bottom_adjacency_clauses: int -> int -> set_clauses = bottom_adjacency_claus
 
 let rec right_adjacency_clauses_aux: int -> int -> set_clauses =
   fun index space -> 
-    let rightq = space*36 + 3 * 9 + 1 and leftq = (space + 1) * 36 + 2 * 9 + 1 in
+    let rightq = space*36 + 3 * 9 and leftq = (space + 1) * 36 + 2 * 9 in
     match index with
-    |n when n<0 -> []
+    |n when n<=0 -> []
     |n -> [[rightq + n; (-1)*(leftq + n)];[(-1)*(rightq + n); (leftq + n)]] @ right_adjacency_clauses_aux (index-1) space;;
 
 let right_adjacency_clauses: int -> set_clauses = right_adjacency_clauses_aux 9;;
@@ -121,7 +121,6 @@ let create_clauses_single_tile (n:int) (t:tile) =
   List.fold_left add_space_variables ([[]]:int list list) variables;;
 
 
-
 let create_tile_clauses (num_spaces: int) (tiles: tile list) =
   List.fold_left (fun acc ti -> acc @ create_clauses_single_tile num_spaces ti) [] tiles;;
 (*takes a list of tiles and a number of spaces 
@@ -131,8 +130,6 @@ and gives a cnf expressinhg that each tile mush be present on on of th spaces*)
 (*--INPUT--*)
 (*Reading the information from the import file*)
 
-let length_board = 2;;
-let height_board = 2;;
 
 (*--OUTPUT--*)
 (*Outputting list of clauses to a dimacs file*)
@@ -152,20 +149,27 @@ let create_dimacs_file (file:string) (num_spaces:int) (clauses:set_clauses)  =
 
 (*MAIN function*)
 let main =
-  let file = "example1.txt" in
-  let t:tile list = [
-    {top = 2; bottom = 1; left = 3; right = 1}; 
-    {top = 2; bottom = 1; left = 1; right = 2}; 
-    {top = 1; bottom = 3; left = 3; right = 1};  
-    {top = 1; bottom = 3; left = 1; right = 2};
-  ] in
+  let file0 = "example1.txt" in
+  let file1 = "example1.txt" in
+
+(*TO BE EXTRACTD FROM INPUT FILE*)  
   let num_columns = 2 and num_lines = 2 in
+  let t:tile list = [
+    {top = 2; bottom = 1; left = 1; right = 1}; 
+    {top = 1; bottom = 2; left = 1; right = 1}; 
+    {top = 1; bottom = 1; left = 2; right = 1};  
+    {top = 1; bottom = 1; left = 1; right = 2};
+  ] in
+(*TO BE EXTRACTED FROM INPUT FILE*)
+
   let num_spaces = num_columns*num_lines in
   let adj_clauses = create_adjacency_clauses num_columns num_lines 
   and qud_clauses = create_quadrant_clauses (num_spaces-1)
   and tile_clauses = create_tile_clauses num_spaces t in
+  let non_tile_clauses = adj_clauses @ qud_clauses in 
   let all_clauses = adj_clauses @ qud_clauses @ tile_clauses in
-  create_dimacs_file file num_spaces all_clauses;;
+  create_dimacs_file file0 num_spaces non_tile_clauses;
+  create_dimacs_file file1 num_spaces all_clauses;;
 
 
 
