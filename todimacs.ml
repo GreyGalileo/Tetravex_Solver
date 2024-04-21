@@ -11,7 +11,7 @@ We ill assemble a set of clauses as a list of lists and
 convert this to strings at the end of the program when we output to a file
 *)
 
-let file = "example.txt"
+
 
 type clause = int list;;
 type set_clauses = int list list;;
@@ -70,7 +70,7 @@ i.e. top and bottom and leeft and right of spaces that are next to each other
 let rec bottom_adjacency_clauses_aux: int -> int -> int -> set_clauses =
   (*creates the adjacency clauses that posit that *)
   fun index line_length space ->
-    let bottomq = space*36 + 10 and topq = (space + line_length)*36 in
+    let bottomq = space*36 + 10 and topq = (space + line_length)*36 + 1 in
     match index with
     |n when n<0 -> []
     |n -> [[bottomq + n; (-1)*(topq + n)];[(-1)*(bottomq + n); (topq + n)]] @ bottom_adjacency_clauses_aux (index-1) line_length space;;
@@ -142,7 +142,7 @@ let rec add_clause_to_string (s:string) (c:clause) =
   |[] -> s ^ " 0\n"
   |var::res -> add_clause_to_string (s ^ " " ^ (string_of_int var)) res;;
 
-let create_dimacs_file (num_spaces:int) (clauses:set_clauses) =
+let create_dimacs_file (file:string) (num_spaces:int) (clauses:set_clauses)  =
   let oc = open_out file in
   let numvar = num_spaces * 36 and numclauses = List.length clauses in 
   let firstline = "p cnf " ^ (string_of_int numvar) ^ " " ^ (string_of_int numclauses) ^ "\n" in
@@ -151,18 +151,13 @@ let create_dimacs_file (num_spaces:int) (clauses:set_clauses) =
 
 
 (*MAIN function*)
-let main = 
-(*  let t:tile list = [
-    {top = 9; bottom = 7; left = 1; right = 4}; 
-    {top = 6; bottom = 1; left = 1; right = 1}; 
-    {top = 1; bottom = 6; left = 1; right = 2};  
-    {top = 1; bottom = 9; left = 2; right = 9};
-  ] in*)
+let main =
+  let file = "example1.txt" in
   let t:tile list = [
-    {top = 1; bottom = 1; left = 1; right = 1}; 
-    {top = 1; bottom = 1; left = 1; right = 1}; 
-    {top = 1; bottom = 1; left = 1; right = 1};  
-    {top = 1; bottom = 1; left = 1; right = 1};
+    {top = 2; bottom = 1; left = 3; right = 1}; 
+    {top = 2; bottom = 1; left = 1; right = 2}; 
+    {top = 1; bottom = 3; left = 3; right = 1};  
+    {top = 1; bottom = 3; left = 1; right = 2};
   ] in
   let num_columns = 2 and num_lines = 2 in
   let num_spaces = num_columns*num_lines in
@@ -170,7 +165,7 @@ let main =
   and qud_clauses = create_quadrant_clauses (num_spaces-1)
   and tile_clauses = create_tile_clauses num_spaces t in
   let all_clauses = adj_clauses @ qud_clauses @ tile_clauses in
-  create_dimacs_file num_spaces all_clauses;;
+  create_dimacs_file file num_spaces all_clauses;;
 
 
 
