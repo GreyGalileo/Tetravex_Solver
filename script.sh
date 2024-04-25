@@ -14,7 +14,7 @@ if grep -q "UNSAT" example1.txt; then
     echo "UNSATIFIABLE"
 # If the Sat-Solver finds that the model is satisfiable, we graphically display the solution :
 else
-    python dimacs2graphics.py
+    python3 dimacs2graphics.py
 fi
 
 # Deletion of example1.txt, to avoid overwriting
