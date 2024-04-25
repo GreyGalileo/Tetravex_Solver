@@ -176,8 +176,8 @@ let main =
      This function takes this game and creates propositional clasues that allow it to be solved,
      Then puts these clauss in dimacs format and writes them to the second file
   *)
-  let input_file = "game_file.txt" (*Sys.argv.(0)*) 
-  and output_file = "example.txt" (*Sys.argv.(1)*) in
+  let input_file = Sys.argv.(1) 
+  and output_file = Sys.argv.(2) in
   let (num_columns, num_lines, t) = read_input input_file in
   let num_spaces = num_columns*num_lines in
 
