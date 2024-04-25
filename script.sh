@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Bash script to play Tetravex. 
-# The dimensions of the board and the values of the 4 quadrants per tile are set on lines 156 and 158 to 161 of todimacs.ml.
+# The dimensions of the board and the values of the 4 quadrants per tile are set in the file game_file.txt
 
 # Production of a file example1.txt in DIMACS format that can be used by a SAT solver to find a solution
 ocaml todimacs.ml game_file.txt dimacs.txt
