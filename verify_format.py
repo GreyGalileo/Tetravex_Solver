@@ -34,7 +34,7 @@ def verify_file_format(file_name):
         raise FileNotFoundError("File not found.")
 
 # Test the program with the file
-test_file_name = "/home/ambre/INF432/game_file.txt"
+test_file_name = "game_file.txt"
 try:
     if verify_file_format(test_file_name):
         print("The file format is correct.")
