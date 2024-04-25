@@ -10,7 +10,7 @@ Clauses are represented as lists of integers, the integers being variables
 We ill assemble a set of clauses as a list of lists and 
 convert this to strings at the end of the program when we output to a file
 *)
-
+(*#include <unistd.h>*)
 
 
 type clause = int list;;
@@ -129,6 +129,23 @@ and gives a cnf expressinhg that each tile mush be present on on of th spaces*)
 
 (*--INPUT--*)
 (*Reading the information from the import file*)
+exception WrongFileFormat;;
+
+let get_digit (i:char) = 
+  Char.code (i) - Char.code '0';;
+
+let read_input (filename:string) = 
+  let input = open_in filename in
+  let first_line = input_line input in
+  let num_lines = get_digit (first_line.[0])
+  and num_cols = get_digit (first_line.[2]) in
+  let spaces = num_lines * num_cols in
+  let t_array = Array.make spaces ({top = 1; bottom = 1; left = 1 ; right = 1}) in
+  for i = 0 to spaces-1 do
+    let line_text = input_line input in
+    t_array.(i) <- {top = get_digit (line_text.[0]) ; bottom = get_digit (line_text.[2]) ; left = get_digit (line_text.[4]) ; right = get_digit (line_text.[6]) }
+  done;
+  (num_lines, num_cols, Array.to_list t_array);;
 
 
 (*--OUTPUT--*)
@@ -152,7 +169,7 @@ let main =
   let file0 = "example.txt" in
   let file1 = "example1.txt" in
 
-(*TO BE EXTRACTD FROM INPUT FILE*)  
+(*TO BE EXTRACTD FROM INPUT FILE  
   let num_columns = 3 and num_lines = 3 in
   let t:tile list = [
     {top = 2; bottom = 1; left = 1; right = 1}; 
@@ -165,9 +182,10 @@ let main =
     {top = 4; bottom = 4; left = 2; right = 2};
     {top = 1; bottom = 1; left = 2; right = 4}; 
   ] in
-(*TO BE EXTRACTED FROM INPUT FILE*)
-
+TO BE EXTRACTED FROM INPUT FILE*)
+  let (num_columns, num_lines, t) = read_input "game_file.txt" in
   let num_spaces = num_columns*num_lines in
+  (*
   let adj_clauses = create_adjacency_clauses num_columns num_lines 
   and qud_clauses = create_quadrant_clauses (num_spaces-1)
   and tile_clauses = create_tile_clauses num_spaces t in
@@ -175,6 +193,11 @@ let main =
   let all_clauses = adj_clauses @ qud_clauses @ tile_clauses in
   create_dimacs_file file0 num_spaces non_tile_clauses;
   create_dimacs_file file1 num_spaces all_clauses;;
+  *)
+  let adj_clauses = create_adjacency_clauses num_columns num_lines 
+  and qud_clauses = create_quadrant_clauses (num_spaces-1) in
+  let non_tile_clauses = adj_clauses @ qud_clauses in 
+  create_dimacs_file file0 num_spaces non_tile_clauses;;
 
 
 
