@@ -7,15 +7,16 @@
 ocaml todimacs.ml
 
 # Feeding the generated file to the SAT-solver.
-minisat example1.txt result_sat.txt
+minisat example1.txt result.txt
 
-# If the Sat-Solver evaluate the model as unsatisfiable :
-if grep -q "UNSAT" example1.txt; then
-    echo "UNSATIFIABLE"
-# If the Sat-Solver finds that the model is satisfiable, we graphically display the solution :
+
+if [ -f "example1.txt" ]; then
+    # If the Sat-Solver evaluate the model as unsatisfiable :
+    if grep -q "UNSAT" "result.txt"; then
+        echo "There's no solution, please try with new tile values"
+    else
+        python3 dimacs2graphics.py
+    fi
 else
-    python3 dimacs2graphics.py
+    echo "The file example1.txt does not exist"
 fi
-
-# Deletion of example1.txt, to avoid overwriting
-rm example1.txt
