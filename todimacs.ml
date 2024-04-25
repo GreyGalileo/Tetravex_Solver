@@ -182,34 +182,16 @@ let main =
   let (num_columns, num_lines, t) = read_input input_file in
   let num_spaces = num_columns*num_lines in
 
-  (*
   let adj_clauses = create_adjacency_clauses num_columns num_lines 
   and qud_clauses = create_quadrant_clauses (num_spaces-1)
   and tile_clauses = create_tile_clauses num_spaces t in
-  let non_tile_clauses = adj_clauses @ qud_clauses in 
-  let all_clauses = adj_clauses @ qud_clauses @ tile_clauses in
-  create_dimacs_file output_file num_spaces non_tile_clauses;
-  create_dimacs_file output_file num_spaces all_clauses;;
-  *)
 
+  let all_clauses = adj_clauses @ qud_clauses @ tile_clauses in
+  create_dimacs_file output_file num_spaces all_clauses;;
+
+  (*
   let adj_clauses = create_adjacency_clauses num_columns num_lines 
   and qud_clauses = create_quadrant_clauses (num_spaces-1) in
   let non_tile_clauses = adj_clauses @ qud_clauses in 
   create_dimacs_file output_file num_spaces non_tile_clauses;;
-
-
-
-(* Printing a list of lists for testing*)
-
-(*
-print_string "\nAdjacency clauses:\n";;
-
-List.iter (fun l -> (print_string "["); (List.iter (fun i -> print_int i; print_string ", ") l); (print_string "]\n")) (create_adjacency_clauses 2 2);;
-
-print_string "\nQuadrant clauses:\n";;
-
-List.iter (fun l -> (print_string "["); (List.iter (fun i -> print_int i; print_string ", ") l); (print_string "]\n")) (create_quadrant_clauses 3);;
-
-print_string "\nTile clauses:\n";;
-List.iter (fun l -> (print_string "["); (List.iter (fun i -> print_int i; print_string ", ") l); (print_string "]\n")) (create_clauses_single_tile 4 t);;
-*)
+  *)
