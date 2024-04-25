@@ -149,16 +149,21 @@ let create_dimacs_file (file:string) (num_spaces:int) (clauses:set_clauses)  =
 
 (*MAIN function*)
 let main =
-  let file0 = "example1.txt" in
+  let file0 = "example.txt" in
   let file1 = "example1.txt" in
 
 (*TO BE EXTRACTD FROM INPUT FILE*)  
-  let num_columns = 2 and num_lines = 2 in
+  let num_columns = 3 and num_lines = 3 in
   let t:tile list = [
     {top = 2; bottom = 1; left = 1; right = 1}; 
     {top = 1; bottom = 2; left = 1; right = 1}; 
     {top = 1; bottom = 1; left = 2; right = 1};  
     {top = 1; bottom = 1; left = 1; right = 2};
+    {top = 2; bottom = 1; left = 2; right = 3};  
+    {top = 1; bottom = 1; left = 3; right = 2};
+    {top = 3; bottom = 1; left = 2; right = 1};  
+    {top = 4; bottom = 4; left = 2; right = 2};
+    {top = 1; bottom = 1; left = 2; right = 4}; 
   ] in
 (*TO BE EXTRACTED FROM INPUT FILE*)
 
