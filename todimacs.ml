@@ -135,6 +135,11 @@ let get_digit (i:char) =
   Char.code (i) - Char.code '0';;
 
 let read_input (filename:string) = 
+  (*
+    Takes the name of a file as an argument and outputs: 
+    the number of lines and columns, defined on the first line of the file
+    a list of tiles, each defined on each subsequent line of the input file
+  *)
   let input = open_in filename in
   let first_line = input_line input in
   let num_lines = get_digit (first_line.[0])
@@ -166,38 +171,30 @@ let create_dimacs_file (file:string) (num_spaces:int) (clauses:set_clauses)  =
 
 (*MAIN function*)
 let main =
-  let file0 = "example.txt" in
-  let file1 = "example1.txt" in
-
-(*TO BE EXTRACTD FROM INPUT FILE  
-  let num_columns = 3 and num_lines = 3 in
-  let t:tile list = [
-    {top = 2; bottom = 1; left = 1; right = 1}; 
-    {top = 1; bottom = 2; left = 1; right = 1}; 
-    {top = 1; bottom = 1; left = 2; right = 1};  
-    {top = 1; bottom = 1; left = 1; right = 2};
-    {top = 2; bottom = 1; left = 2; right = 3};  
-    {top = 1; bottom = 1; left = 3; right = 2};
-    {top = 3; bottom = 1; left = 2; right = 1};  
-    {top = 4; bottom = 4; left = 2; right = 2};
-    {top = 1; bottom = 1; left = 2; right = 4}; 
-  ] in
-TO BE EXTRACTED FROM INPUT FILE*)
-  let (num_columns, num_lines, t) = read_input "game_file.txt" in
+  (*Takes 2 files as arguments
+     The first being a file specifying the configuration of thee game
+     This function takes this game and creates propositional clasues that allow it to be solved,
+     Then puts these clauss in dimacs format and writes them to the second file
+  *)
+  let input_file = "game_file.txt" (*Sys.argv.(0)*) 
+  and output_file = "example.txt" (*Sys.argv.(1)*) in
+  let (num_columns, num_lines, t) = read_input input_file in
   let num_spaces = num_columns*num_lines in
+
   (*
   let adj_clauses = create_adjacency_clauses num_columns num_lines 
   and qud_clauses = create_quadrant_clauses (num_spaces-1)
   and tile_clauses = create_tile_clauses num_spaces t in
   let non_tile_clauses = adj_clauses @ qud_clauses in 
   let all_clauses = adj_clauses @ qud_clauses @ tile_clauses in
-  create_dimacs_file file0 num_spaces non_tile_clauses;
-  create_dimacs_file file1 num_spaces all_clauses;;
+  create_dimacs_file output_file num_spaces non_tile_clauses;
+  create_dimacs_file output_file num_spaces all_clauses;;
   *)
+
   let adj_clauses = create_adjacency_clauses num_columns num_lines 
   and qud_clauses = create_quadrant_clauses (num_spaces-1) in
   let non_tile_clauses = adj_clauses @ qud_clauses in 
-  create_dimacs_file file0 num_spaces non_tile_clauses;;
+  create_dimacs_file output_file num_spaces non_tile_clauses;;
 
 
 
