@@ -61,7 +61,7 @@ def display(solution):
 
 
 #test with a 2x2 tetravex grid
-print("\nSolution of result:\n")
+print("\nSolution provided by minisat:\n")
 list = result2list("result.txt")
 list = getPositive(list)
 list = pos_list2quadrants(list)
@@ -69,11 +69,3 @@ list = pos2tiles(list)
 list = convert_to_solution(list)
 display(list)
 
-#test with a 2x2 tetravex grid with tile clauses
-print("\nSolution of result1:\n")
-list = result2list("result1.txt")
-list = getPositive(list)
-list = pos_list2quadrants(list)
-list = pos2tiles(list)
-list = convert_to_solution(list)
-display(list)

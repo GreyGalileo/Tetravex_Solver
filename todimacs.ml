@@ -131,7 +131,8 @@ and gives a cnf expressinhg that each tile mush be present on on of th spaces*)
 (*Reading the information from the import file*)
 exception WrongFileFormat;;
 
-let get_digit (i:char) = 
+let get_digit (i:char) =
+  (*Converts a character to a digit (int) provided it is between '0' and '9'*) 
   Char.code (i) - Char.code '0';;
 
 let read_input (filename:string) = 
