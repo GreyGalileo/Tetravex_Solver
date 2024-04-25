@@ -3,4 +3,12 @@ This is project with the goal of using a DIMACS SAT-Solver to solve a game of te
 We define our own file format containg on the first line the length and height of the tetravex board we're playing on. 
 On each subsequent line we give the configuration of a tile by giving the values in its "quadrants" (the triangles holding values) in order: top bottom left right.
 
+It is assumed that none of the tiles provided are identical, i.e. they are all pairwise distinct. If a game is entered with identical tiles the solution will most likely be fallacious.
+
+We built a bash script which takes a fil input and streamlines the process of looking for a model and representing it in a readable fashion, the script calls several other programs:
+
 We have a program written in Ocaml which trasforms this into a DIMACS file where our propositional variables represent whether or not a given quadrant contains a given value.
+
+We then call minisat on tthe dimacs file to get the satisfiability and a model.
+
+If we have a model the python script "dimacs2graphics.py" repreesents this model in the terminal as the blocs and tiles that it contains.
