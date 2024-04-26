@@ -3,7 +3,14 @@
 # Bash script to play Tetravex. 
 # The dimensions of the board and the values of the 4 quadrants per tile are set in the file game_file.txt
 
-if python3 verify_format.py ; then
+
+# Check if an argument is provided
+if [ $# -ne 1 ]; then
+    echo "Usage: ./script.sh <file_name>"
+    exit 1
+fi
+
+if python3 verify_format.py $1; then
     echo "Continue with the other programs..."
 
     # Production of a file example1.txt in DIMACS format that can be used by a SAT solver to find a solution
@@ -25,5 +32,5 @@ if python3 verify_format.py ; then
     fi
 else
     echo "Error: Incorrect file format. Execution stopped."
-    exit 1  # Sortir avec un code d'erreur
+    exit 1 
 fi
