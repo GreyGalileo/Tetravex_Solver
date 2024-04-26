@@ -88,6 +88,12 @@ let rec right_adjacency_clauses_aux: int -> int -> set_clauses =
 let right_adjacency_clauses: int -> set_clauses = right_adjacency_clauses_aux 9;;
 
 let create_adjacency_clauses: int -> int -> set_clauses =
+    (*
+    takes height and length of board in spaces 
+    and produces CNF clauses translating the conditions 
+    that 2 adjacent clauses must have the sam value
+    using the CNF form of equivalences between the variables
+    *)
   fun lines columns ->
     let create_adj_clauses_one_space: int -> set_clauses = fun space ->
       match space with
@@ -97,6 +103,7 @@ let create_adjacency_clauses: int -> int -> set_clauses =
       |n -> (bottom_adjacency_clauses lines space) @ (right_adjacency_clauses space)
     in 
     let rec create_adj_clauses_from: int -> set_clauses =
+      (*auxiliary recursive function*)
       fun index ->
         match index with
         |n when (n >= lines * columns - 1) -> []
@@ -109,7 +116,7 @@ let create_adjacency_clauses: int -> int -> set_clauses =
 type tile = {top: int; bottom:int; left:int; right:int};;
 
 
-(*COMMENTEED CODE BELOW IS OBSOLEETE, WE WILL PRINT TILE CLAUSES DIIRECTLY TO OC*)
+(*COMMENTEED CODE BELOW IS OBSOLETE, WE WILL PRINT TILE CLAUSES DIIRECTLY TO OC*)
 (*
 let create_clauses_single_tile (n:int) (t:tile) =
   (* creates CNF clauses for a single tile and for all n spaces on the board *)

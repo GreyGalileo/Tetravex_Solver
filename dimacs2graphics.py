@@ -61,7 +61,7 @@ def display(solution):
 
 #test with a 2x2 tetravex grid
 print("\nSolution provided by minisat:\n")
-list = result2list("result2.txt")
+list = result2list("result.txt")
 list = getPositive(list)
 list = pos_list2quadrants(list)
 list = pos2tiles(list)
