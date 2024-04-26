@@ -5,7 +5,10 @@ On each subsequent line we give the configuration of a tile by giving the values
 
 It is assumed that none of the tiles provided are identical, i.e. they are all pairwise distinct. If a game is entered with identical tiles the solution will most likely be fallacious.
 
-We built a bash script which takes a file input and streamlines the process of looking for a model and representing it in a readable fashion, the script calls several other programs:
+Note that memory and time complexity are exponential with respect to the size of the board, entering games bigger than 3x3 is strongly discouraged.
+
+The bash script script.sh takes one file argument and runs the solver (the various programs) on the game in thee file.
+script.sh takes a file input and streamlines the process of looking for a model and representing it in a readable fashion, the script calls several other programs:
 
 We have a program written in Python, verify_format.py, in order to check that the format of the file to be used as input by the Ocaml program (todimacs.ml) is correct.
 
@@ -13,4 +16,4 @@ We have a program written in Ocaml which transforms this into a DIMACS file wher
 
 We then call minisat on the dimacs file to get the satisfiability and a model.
 
-If we have a model the python script "dimacs2graphics.py" represents this model in the terminal as the blocs and tiles that it contains.
+If we have a model the python script "dimacs2graphics.py" represents this model in the terminal (stdout) as the blocs and tiles that it contains.
