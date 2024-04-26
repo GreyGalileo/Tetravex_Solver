@@ -14,7 +14,7 @@ if python3 verify_format.py $1; then
     echo "Continue with the other programs..."
 
     # Production of a file example1.txt in DIMACS format that can be used by a SAT solver to find a solution
-    ocaml todimacs.ml game_file.txt dimacs.txt
+    ocaml todimacs.ml $1 dimacs.txt
 
     # Feeding the generated file to the SAT-solver.
     minisat dimacs.txt result.txt
