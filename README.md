@@ -13,4 +13,4 @@ We have a program written in Ocaml which transforms this into a DIMACS file wher
 
 We then call minisat on the dimacs file to get the satisfiability and a model.
 
-If we have a model the python script "dimacs2graphics.py" repreesents this model in the terminal as the blocs and tiles that it contains.
+If we have a model the python script "dimacs2graphics.py" represents this model in the terminal as the blocs and tiles that it contains.
