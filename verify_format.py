@@ -1,3 +1,4 @@
+import sys
 def verify_file_format(file_name):
     try:
         with open(file_name, 'r') as f:
@@ -33,13 +34,22 @@ def verify_file_format(file_name):
     except FileNotFoundError:
         raise FileNotFoundError("File not found.")
 
-# Test the program with the file
-test_file_name = "game_file.txt"
-try:
-    if verify_file_format(test_file_name):
-        print("The file format is correct.")
-    else:
-        print("The file format is incorrect.")
-except Exception as e:
-    print(f"Error: {e}")
-    exit(1)  # Exit with an error code
+
+if __name__ == "__main__":
+    # Check if the correct number of arguments is provided
+    if len(sys.argv) != 2:
+        print("Usage: python your_script.py <file_name>")
+        exit(1)
+
+    # Get the file name from command line arguments
+    file_name = sys.argv[1]
+
+    # Test the program with the file
+    try:
+        if verify_file_format(file_name):
+            print("The file format is correct.")
+        else:
+            print("The file format is incorrect.")
+    except Exception as e:
+        print(f"Error: {e}")
+        exit(1)
