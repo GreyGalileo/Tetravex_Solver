@@ -108,6 +108,9 @@ let create_adjacency_clauses: int -> int -> set_clauses =
 (*--TILE CLAUSES ( *** )--*)
 type tile = {top: int; bottom:int; left:int; right:int};;
 
+
+(*COMMENTEED CODE BELOW IS OBSOLEETE, WE WILL PRINT TILE CLAUSES DIIRECTLY TO OC*)
+(*
 let create_clauses_single_tile (n:int) (t:tile) =
   (* creates CNF clauses for a single tile and for all n spaces on the board *)
   let variables_for_space s = 
@@ -120,9 +123,63 @@ let create_clauses_single_tile (n:int) (t:tile) =
   in
   List.fold_left add_space_variables ([[]]:int list list) variables;;
 
+let create_single_tile_clauses_arrays (n:int) (t:tile) =
+  let tile_array = Array.of_list [t.top; 9+t.bottom; 18+t.left; 27+t.right]
+  and spaces_array = Array.init n (fun x -> 36*x) in
+  let num_clauses = int_exp 4 n in(*4^n clauses total for n spaces and n tiles*)
+  let result = Array.make num_clauses (Array.make n 0) in
+  let rec generate_array (depth:int) (index:int) (a: int array)=
+    match depth with
+    |d when d >= n -> ()
+    |_ -> a.(depth) <- (spaces_array.(depth) + tile_array.(index mod 4)); (generate_array (depth + 1) (index / 4) a)
+  in
+  for i = 0 to num_clauses-1 do
+    generate_array 0 i result.(i);
+  done;
+  Array.to_list (Array.map Array.to_list result);;
+
+  let create_single_tile_clauses_arrays2 (n:int) (t:tile) =
+    let tile_array = Array.of_list [t.top; 9+t.bottom; 18+t.left; 27+t.right]
+    and spaces_array = Array.init n (fun x -> 36*x) in
+    let num_clauses = int_exp 4 n in(*4^n clauses total for n spaces and n tiles*)
+    let rec generate_list (depth:int) (index:int) =
+      match depth with
+      |d when d >= n -> []
+      |_ -> (spaces_array.(depth) + tile_array.(index mod 4)) :: (generate_list (depth + 1) (index / 4))
+    in
+    let result = Array.init num_clauses (fun i -> generate_list 0 i) in
+    Array.to_list result;;
+
 
 let create_tile_clauses (num_spaces: int) (tiles: tile list) =
-  List.fold_left (fun acc ti -> acc @ create_clauses_single_tile num_spaces ti) [] tiles;;
+  (* creates CNF clauses for the number of spaces on the board and for every tile in the list passed as an argument*)
+  List.fold_left (fun acc ti -> acc @ create_single_tile_clauses_arrays2 num_spaces ti) [] tiles;;
+(*takes a list of tiles and a number of spaces 
+and gives a cnf expressinhg that each tile mush be present on on of th spaces*)
+*)
+
+
+let int_exp x y = (float_of_int x) ** (float_of_int y) |> int_of_float;;
+
+let direct_print_1tile_clauses (n:int) (t:tile) oc =
+  let tile_array = Array.of_list [t.top; 9+t.bottom; 18+t.left; 27+t.right]
+  and spaces_array = Array.init n (fun x -> 36*x) in
+  let num_clauses = int_exp 4 n in(*4^n clauses total for n spaces and n tiles*)
+  let rec print_clause (depth:int) (index:int)=
+    match depth with
+    |d when d >= n -> ()
+    |_ -> Printf.fprintf oc "%d " (spaces_array.(depth) + tile_array.(index mod 4)); (print_clause (depth + 1) (index / 4))
+  in
+  for i = 0 to num_clauses-1 do
+    print_clause 0 i;
+    Printf.fprintf oc "0\n";
+  done;;
+  
+
+let print_tile_clauses (num_spaces: int) (tiles: tile list) oc =
+  (*This function prints the tile clauses directly to OC because there are too many to be handeled by create_dimacs function*)
+  (* creates CNF clauses for the number of spaces on the board and for every tile in the list passed as an argument*)
+  List.fold_left (fun _ ti -> direct_print_1tile_clauses num_spaces ti oc) () tiles;;
 (*takes a list of tiles and a number of spaces 
 and gives a cnf expressinhg that each tile mush be present on on of th spaces*)
 
@@ -164,10 +221,11 @@ let rec add_clause_to_string (s:string) (c:clause) =
 
 let create_dimacs_file (file:string) (num_spaces:int) (clauses:set_clauses)  =
   let oc = open_out file in
-  let numvar = num_spaces * 36 and numclauses = List.length clauses in 
+  let numvar = num_spaces * 36 and numclauses = (List.length clauses) + (int_exp 4 num_spaces) * num_spaces in 
   let firstline = "p cnf " ^ (string_of_int numvar) ^ " " ^ (string_of_int numclauses) ^ "\n" in
   let body_of_text = List.fold_left add_clause_to_string firstline clauses in
-  Printf.fprintf oc "%s" body_of_text;;
+  Printf.fprintf oc "%s" body_of_text;
+  oc;;
 
 
 (*MAIN function*)
@@ -182,16 +240,18 @@ let main =
   let (num_columns, num_lines, t) = read_input input_file in
   let num_spaces = num_columns*num_lines in
 
+
+(*
   let adj_clauses = create_adjacency_clauses num_columns num_lines 
   and qud_clauses = create_quadrant_clauses (num_spaces-1)
   and tile_clauses = create_tile_clauses num_spaces t in
 
   let all_clauses = adj_clauses @ qud_clauses @ tile_clauses in
   create_dimacs_file output_file num_spaces all_clauses;;
+*)
 
-  (*
   let adj_clauses = create_adjacency_clauses num_columns num_lines 
   and qud_clauses = create_quadrant_clauses (num_spaces-1) in
   let non_tile_clauses = adj_clauses @ qud_clauses in 
-  create_dimacs_file output_file num_spaces non_tile_clauses;;
-  *)
+  let oc = create_dimacs_file output_file num_spaces non_tile_clauses in
+  print_tile_clauses num_spaces t oc;;
