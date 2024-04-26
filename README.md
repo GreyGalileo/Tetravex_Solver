@@ -5,10 +5,12 @@ On each subsequent line we give the configuration of a tile by giving the values
 
 It is assumed that none of the tiles provided are identical, i.e. they are all pairwise distinct. If a game is entered with identical tiles the solution will most likely be fallacious.
 
-We built a bash script which takes a fil input and streamlines the process of looking for a model and representing it in a readable fashion, the script calls several other programs:
+We built a bash script which takes a file input and streamlines the process of looking for a model and representing it in a readable fashion, the script calls several other programs:
+
+We have a program written in Python, verify_format.py, in order to check that the format of the file to be used as input by the Ocaml program (todimacs.ml) is correct.
 
 We have a program written in Ocaml which trasforms this into a DIMACS file where our propositional variables represent whether or not a given quadrant contains a given value.
 
-We then call minisat on tthe dimacs file to get the satisfiability and a model.
+We then call minisat on the dimacs file to get the satisfiability and a model.
 
 If we have a model the python script "dimacs2graphics.py" repreesents this model in the terminal as the blocs and tiles that it contains.
