@@ -9,7 +9,7 @@ We built a bash script which takes a file input and streamlines the process of l
 
 We have a program written in Python, verify_format.py, in order to check that the format of the file to be used as input by the Ocaml program (todimacs.ml) is correct.
 
-We have a program written in Ocaml which trasforms this into a DIMACS file where our propositional variables represent whether or not a given quadrant contains a given value.
+We have a program written in Ocaml which transforms this into a DIMACS file where our propositional variables represent whether or not a given quadrant contains a given value.
 
 We then call minisat on the dimacs file to get the satisfiability and a model.
 
