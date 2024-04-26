@@ -27,8 +27,7 @@ def pos_list2quadrants(pos_list):
 #for an easier way to display, we transform our pos_list into a tiles_list
 #list2tiles : list -> list of list
 def pos2tiles(pos_list):
-    n = len(pos_list)//4 #number of tiles
-    tiles_list = [pos_list[i:i+n] for i in range(0, len(pos_list), n)]
+    tiles_list = [pos_list[i:i+4] for i in range(0, len(pos_list), 4)]
     return tiles_list
 
 #take the tiles_list and group up the tiles in respect of the lines
@@ -62,7 +61,7 @@ def display(solution):
 
 #test with a 2x2 tetravex grid
 print("\nSolution provided by minisat:\n")
-list = result2list("result.txt")
+list = result2list("result2.txt")
 list = getPositive(list)
 list = pos_list2quadrants(list)
 list = pos2tiles(list)
