@@ -18,6 +18,7 @@ def getPositive(terms_list):
     return positive_numbers
 
 def getValues(pos_list):
+    #removes extra varibales introduced during tseytin tr. (last 1/5 of positive values)
     l = len(pos_list)
     value_variables = pos_list[0:int(4 * l / 5)]
     return value_variables

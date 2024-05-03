@@ -10,7 +10,6 @@ Clauses are represented as lists of integers, the integers being variables
 We ill assemble a set of clauses as a list of lists and 
 convert this to strings at the end of the program when we output to a file
 *)
-(*#include <unistd.h>*)
 
 
 type clause = int list;;
@@ -115,16 +114,24 @@ let create_adjacency_clauses: int -> int -> set_clauses =
 (*--TILE CLAUSES ( *** )--*)
 type tile = {top: int; bottom:int; left:int; right:int};;
 
-let tseytin_tile_clauses_1tile (n:int) (t:tile) (tile_index:int) = 
+let tseytin_tile_clauses_1tile (n:int) (t:tile) (tile_index:int) =
+  (*
+    Takes a tile, the index of the tile in the list and the number of spaces as input 
+    and produces the CNF clauses for (****) and (*****), 
+    the tile clauses using tseytin transformation to introduce new variables for eeach DNF
+    the integer variable 36*n + (n*t) + s represents whether or not tile t is in space s.
+  *) 
   let start_index = (36 + tile_index) * n + 1 in
   let tsey_var_disjunction = List.init n (fun s -> start_index + s) in
   let clauses_space (s:int) = 
+    (*Creates all tseeytin clauses for one space and for the given tile*)
     let clause_num = s*36
     and tseytin_var = start_index+s in
     let val_vars = [clause_num + t.top; clause_num + 9 + t.bottom; clause_num + 18+t.left; clause_num + 27+t.right] in
     (tseytin_var :: (List.map (fun x -> -x) val_vars)) :: (List.map (fun v -> [-tseytin_var; v]) val_vars)
   in
   let rec create_all (i:int) =
+    (*recursive loop to put together all clauses for current tile*)
     match i with
     |i when i >= n -> [tsey_var_disjunction]
     |_ -> (clauses_space i) @ create_all (i+1)
@@ -133,39 +140,17 @@ let tseytin_tile_clauses_1tile (n:int) (t:tile) (tile_index:int) =
 
 
 let create_tile_clauses_tseytin (n:int) (tiles: tile list) = 
+  (*
+     Produces the CNF forms of thee tseytin transformed formulae for tiles,
+     (****) and (*****) in the report, see auxiliary function above for specifics
+  *)
   let rec create_all (tiles: tile list) (index:int) =
+    (*recursive loop through all tiles, calling auxiliary function each time*)
     match tiles with
     |[] -> []
     |t::res -> tseytin_tile_clauses_1tile n t index @ create_all res (index+1)
   in
   create_all tiles 0;;
-
-(*PRINTS DIRECTLY WITH NAIVE CNF EXPANSION*)
-(*
-let int_exp x y = (float_of_int x) ** (float_of_int y) |> int_of_float;;
-
-let direct_print_1tile_clauses (n:int) (t:tile) oc =
-  let tile_array = Array.of_list [t.top; 9+t.bottom; 18+t.left; 27+t.right]
-  and spaces_array = Array.init n (fun x -> 36*x) in
-  let num_clauses = int_exp 4 n in(*4^n clauses total for n spaces and n tiles*)
-  let rec print_clause (depth:int) (index:int)=
-    match depth with
-    |d when d >= n -> ()
-    |_ -> Printf.fprintf oc "%d " (spaces_array.(depth) + tile_array.(index mod 4)); (print_clause (depth + 1) (index / 4))
-  in
-  for i = 0 to num_clauses-1 do
-    print_clause 0 i;
-    Printf.fprintf oc "0\n";
-  done;;
-  
-
-let print_tile_clauses (num_spaces: int) (tiles: tile list) oc =
-  (*This function prints the tile clauses directly to OC because there are too many to be handeled by create_dimacs function*)
-  (* creates CNF clauses for the number of spaces on the board and for every tile in the list passed as an argument*)
-  List.fold_left (fun _ ti -> direct_print_1tile_clauses num_spaces ti oc) () tiles;;
-(*takes a list of tiles and a number of spaces 
-and gives a cnf expressinhg that each tile mush be present on on of th spaces*)
-*)
 
 (*--INPUT--*)
 (*Reading the information from the import file*)
@@ -232,7 +217,7 @@ let main =
   let all_clauses = adj_clauses @ qud_clauses @ tile_clauses in
   create_dimacs_file output_file num_spaces all_clauses;;
 
-
+(*OLD METHOD*)
 (*
   let adj_clauses = create_adjacency_clauses num_columns num_lines 
   and qud_clauses = create_quadrant_clauses (num_spaces-1) in
