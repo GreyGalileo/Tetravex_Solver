@@ -17,6 +17,11 @@ def getPositive(terms_list):
     positive_numbers = [pos for pos in terms_list if pos > 0]
     return positive_numbers
 
+def getValues(pos_list):
+    l = len(pos_list)
+    value_variables = pos_list[0:int(4 * l / 5)]
+    return value_variables
+
 #this functions aims to converter each number assignated to each quadrant to its real value (removing the numbering)
 #pos_list2quadrants : list -> list
 def pos_list2quadrants(pos_list):
@@ -63,6 +68,7 @@ def display(solution):
 print("\nSolution provided by minisat:\n")
 list = result2list("result.txt")
 list = getPositive(list)
+list = getValues(list)
 list = pos_list2quadrants(list)
 list = pos2tiles(list)
 list = convert_to_solution(list)
