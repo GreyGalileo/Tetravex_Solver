@@ -115,57 +115,33 @@ let create_adjacency_clauses: int -> int -> set_clauses =
 (*--TILE CLAUSES ( *** )--*)
 type tile = {top: int; bottom:int; left:int; right:int};;
 
+let tseytin_tile_clauses_1tile (n:int) (t:tile) (tile_index:int) = 
+  let start_index = (36 + tile_index) * n + 1 in
+  let tsey_var_disjunction = List.init n (fun s -> start_index + s) in
+  let clauses_space (s:int) = 
+    let clause_num = s*36
+    and tseytin_var = start_index+s in
+    let val_vars = [clause_num + t.top; clause_num + 9 + t.bottom; clause_num + 18+t.left; clause_num + 27+t.right] in
+    (tseytin_var :: (List.map (fun x -> -x) val_vars)) :: (List.map (fun v -> [-tseytin_var; v]) val_vars)
+  in
+  let rec create_all (i:int) =
+    match i with
+    |i when i >= n -> [tsey_var_disjunction]
+    |_ -> (clauses_space i) @ create_all (i+1)
+  in
+  create_all 0;;
 
-(*COMMENTEED CODE BELOW IS OBSOLETE, WE WILL PRINT TILE CLAUSES DIIRECTLY TO OC*)
+
+let create_tile_clauses_tseytin (n:int) (tiles: tile list) = 
+  let rec create_all (tiles: tile list) (index:int) =
+    match tiles with
+    |[] -> []
+    |t::res -> tseytin_tile_clauses_1tile n t index @ create_all res (index+1)
+  in
+  create_all tiles 0;;
+
+(*PRINTS DIRECTLY WITH NAIVE CNF EXPANSION*)
 (*
-let create_clauses_single_tile (n:int) (t:tile) =
-  (* creates CNF clauses for a single tile and for all n spaces on the board *)
-  let variables_for_space s = 
-    let v = s*36 in
-     (v+t.top, v+9+t.bottom, v+18+t.left, v+27+t.right)
-  in
-  let variables = List.init n variables_for_space in
-  let add_space_variables  (lst: int list list) (a,b,c,d) =
-    List.fold_left (fun acc sublst -> acc @ [a::sublst ; b::sublst ; c::sublst ; d::sublst]) [] lst
-  in
-  List.fold_left add_space_variables ([[]]:int list list) variables;;
-
-let create_single_tile_clauses_arrays (n:int) (t:tile) =
-  let tile_array = Array.of_list [t.top; 9+t.bottom; 18+t.left; 27+t.right]
-  and spaces_array = Array.init n (fun x -> 36*x) in
-  let num_clauses = int_exp 4 n in(*4^n clauses total for n spaces and n tiles*)
-  let result = Array.make num_clauses (Array.make n 0) in
-  let rec generate_array (depth:int) (index:int) (a: int array)=
-    match depth with
-    |d when d >= n -> ()
-    |_ -> a.(depth) <- (spaces_array.(depth) + tile_array.(index mod 4)); (generate_array (depth + 1) (index / 4) a)
-  in
-  for i = 0 to num_clauses-1 do
-    generate_array 0 i result.(i);
-  done;
-  Array.to_list (Array.map Array.to_list result);;
-
-  let create_single_tile_clauses_arrays2 (n:int) (t:tile) =
-    let tile_array = Array.of_list [t.top; 9+t.bottom; 18+t.left; 27+t.right]
-    and spaces_array = Array.init n (fun x -> 36*x) in
-    let num_clauses = int_exp 4 n in(*4^n clauses total for n spaces and n tiles*)
-    let rec generate_list (depth:int) (index:int) =
-      match depth with
-      |d when d >= n -> []
-      |_ -> (spaces_array.(depth) + tile_array.(index mod 4)) :: (generate_list (depth + 1) (index / 4))
-    in
-    let result = Array.init num_clauses (fun i -> generate_list 0 i) in
-    Array.to_list result;;
-
-
-let create_tile_clauses (num_spaces: int) (tiles: tile list) =
-  (* creates CNF clauses for the number of spaces on the board and for every tile in the list passed as an argument*)
-  List.fold_left (fun acc ti -> acc @ create_single_tile_clauses_arrays2 num_spaces ti) [] tiles;;
-(*takes a list of tiles and a number of spaces 
-and gives a cnf expressinhg that each tile mush be present on on of th spaces*)
-*)
-
-
 let int_exp x y = (float_of_int x) ** (float_of_int y) |> int_of_float;;
 
 let direct_print_1tile_clauses (n:int) (t:tile) oc =
@@ -189,7 +165,7 @@ let print_tile_clauses (num_spaces: int) (tiles: tile list) oc =
   List.fold_left (fun _ ti -> direct_print_1tile_clauses num_spaces ti oc) () tiles;;
 (*takes a list of tiles and a number of spaces 
 and gives a cnf expressinhg that each tile mush be present on on of th spaces*)
-
+*)
 
 (*--INPUT--*)
 (*Reading the information from the import file*)
@@ -228,7 +204,7 @@ let rec add_clause_to_string (s:string) (c:clause) =
 
 let create_dimacs_file (file:string) (num_spaces:int) (clauses:set_clauses)  =
   let oc = open_out file in
-  let numvar = num_spaces * 36 and numclauses = (List.length clauses) + (int_exp 4 num_spaces) * num_spaces in 
+  let numvar = num_spaces * (36 + num_spaces) and numclauses = (List.length clauses) in 
   let firstline = "p cnf " ^ (string_of_int numvar) ^ " " ^ (string_of_int numclauses) ^ "\n" in
   let body_of_text = List.fold_left add_clause_to_string firstline clauses in
   Printf.fprintf oc "%s" body_of_text;
@@ -248,17 +224,19 @@ let main =
   let num_spaces = num_columns*num_lines in
 
 
-(*
+
   let adj_clauses = create_adjacency_clauses num_columns num_lines 
   and qud_clauses = create_quadrant_clauses (num_spaces-1)
-  and tile_clauses = create_tile_clauses num_spaces t in
+  and tile_clauses =  create_tile_clauses_tseytin num_spaces t in
 
   let all_clauses = adj_clauses @ qud_clauses @ tile_clauses in
   create_dimacs_file output_file num_spaces all_clauses;;
-*)
 
+
+(*
   let adj_clauses = create_adjacency_clauses num_columns num_lines 
   and qud_clauses = create_quadrant_clauses (num_spaces-1) in
   let non_tile_clauses = adj_clauses @ qud_clauses in 
   let oc = create_dimacs_file output_file num_spaces non_tile_clauses in
   print_tile_clauses num_spaces t oc;;
+*)
