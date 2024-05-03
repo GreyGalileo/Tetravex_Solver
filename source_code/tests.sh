@@ -43,7 +43,5 @@ print_separator
 
 # Test on a 3x3 board
 echo -e "\e[1;35mTest on a 3x3 board : file 3x3.txt \e[0m\n"
-echo "Execution works, but takes about 20 minutes (we'll explain why in the final report)."
-echo "Remove the comment from tests.sh (line 48) to test it."
-#./script.sh ./TEST_FILES/3x3.txt
+./script.sh ./TEST_FILES/3x3.txt
 print_separator
